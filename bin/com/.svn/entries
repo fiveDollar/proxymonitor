@@ -1,0 +1,34 @@
+10
+
+dir
+50
+svn://222.92.117.87/wdsvn/wdmail/src/com
+svn://222.92.117.87/wdsvn
+
+
+
+2014-09-16T06:56:01.871907Z
+48
+zhangxian
+
+
+svn:special svn:externals svn:needs-lock
+
+
+
+
+
+
+
+
+
+
+
+2eb47d29-b991-4b8c-997e-3e8f3aac4361
+
+util
+dir
+
+windoor
+dir
+

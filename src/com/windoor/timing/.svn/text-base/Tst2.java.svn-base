@@ -1,0 +1,32 @@
+package com.windoor.timing;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+
+public class Tst2 {
+
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+		int y, m, d, h, mi, s;
+		Calendar cal = Calendar.getInstance();
+		cal.add(Calendar.HOUR_OF_DAY, -1);
+		y = cal.get(Calendar.YEAR);
+		m = cal.get(Calendar.MONTH) + 1;
+		d = cal.get(Calendar.DATE);
+		h = cal.get(Calendar.HOUR_OF_DAY);
+		mi = cal.get(Calendar.MINUTE);
+		s = cal.get(Calendar.SECOND);
+		SimpleDateFormat df=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");   
+		String cdate = y + "-" + m + "-" + d + " " + (h) + ":" + mi + ":" + s;
+		Date a = null;
+		try {
+			a = df.parse(cdate);
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		System.out.println(df.format(a));
+	}
+
+}

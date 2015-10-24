@@ -1,0 +1,97 @@
+package com.windoor.timing;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+
+import javax.xml.crypto.Data;
+
+import com.util.mail.Mailto;
+import com.windoor.database.RemoteDatabase;
+
+public class Monitor87 {
+	public static void main(String[] args) {
+		 while (true) {
+		RemoteDatabase db = new RemoteDatabase();
+		int y, m, d, h, mi, s;
+		Calendar cal = Calendar.getInstance();
+		cal.add(Calendar.HOUR_OF_DAY, -1);
+		y = cal.get(Calendar.YEAR);
+		m = cal.get(Calendar.MONTH) + 1;
+		d = cal.get(Calendar.DATE);
+		h = cal.get(Calendar.HOUR_OF_DAY);
+		mi = cal.get(Calendar.MINUTE);
+		s = cal.get(Calendar.SECOND);
+		String sql = "select t.client_id,DATE_FORMAT(tl.run_date,'%Y-%m-%d'),count(distinct tl.ip),count(*) from task_log as tl inner join task as t on t.id = tl.task_id where TO_DAYS(NOW()) - TO_DAYS(tl.run_date) = 0 and tl.success = 1 group by t.client_id,DATE_FORMAT(tl.run_date,'%Y-%m-%d');";
+		ArrayList<Object[]> bs = db.selectall(sql);
+		String ddate = y + "-" + m + "-" + d + " " + h;
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH");
+		Date dd=null;
+		
+		try {
+			dd= sdf.parse(ddate);
+		} catch (ParseException e1) {
+			e1.printStackTrace();
+		}
+		String s1 = "\r\nselect t.client_id,DATE_FORMAT(tl.run_date,'%Y-%m-%d'),count(distinct tl.ip),count(*) from task_log as tl inner join task as t on t.id = tl.task_id where TO_DAYS(NOW()) - TO_DAYS(tl.run_date) = 0 and tl.success = 1 group by t.client_id,DATE_FORMAT(tl.run_date,'%Y-%m-%d');\r\n";
+		for (Object[] b : bs) {
+			int id = (int) b[0];
+			String date = (String) b[1];
+			long countip = (long) b[2];
+			long count = (long) b[3];
+			s1 += id + "," + date + "," + countip + "," + count + "\r\n";
+		}
+
+		String s2 = "\r\nselect server_id,count(*) from task_log as tl inner join task as t on t.id = tl.task_id where client_id = 1 and TO_DAYS(NOW()) - TO_DAYS(tl.run_date) = 0 and DATE_FORMAT(tl.run_date,'%Y-%m-%d %H') = '"
+				+ sdf.format(dd) + "' and tl.success = 1 group by server_id\r\n";
+		String sql2 = "select server_id,count(*) from task_log as tl inner join task as t on t.id = tl.task_id where client_id = 1 and TO_DAYS(NOW()) - TO_DAYS(tl.run_date) = 0 and DATE_FORMAT(tl.run_date,'%Y-%m-%d %H') = '"
+				+ sdf.format(dd)+ "' and tl.success = 1 group by server_id";
+		ArrayList<Object[]> bs2 = db.selectall(sql2);
+		for (Object[] b : bs2) {
+			int id = (int) b[0];
+			long count = (long) b[1];
+			s2 += id + "," + count + "\r\n";
+		}
+
+		String s3 = "\r\nSELECT * FROM `proxy_day` where  TO_DAYS(NOW()) - TO_DAYS(date) = 0\r\n";
+
+		String sql3 = "SELECT * FROM `proxy_day` where  TO_DAYS(NOW()) - TO_DAYS(date) = 0";
+		ArrayList<Object[]> bs3 = db.selectall(sql3);
+		for (Object[] b : bs3) {
+			int id = (int) b[0];
+			Date date = (Date) b[1];
+			int url_id = (int) b[2];
+			int sum = (int) b[3];
+			int a_sum = (int) b[4];
+			s3 += id + "," + date + "," + url_id + "," + sum + "," + a_sum
+					+ "\r\n";
+		}
+
+		String content = s1 + s2 + s3;
+		Mailto mail = new Mailto();
+		while (!mail.send("zhangxian887@qq.com", content, "task")) {
+			System.out.println("adf");
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		while (!mail.send("feng.zhu@szwindoor.com", content, "task")) {
+			System.out.println("adf");
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		 try {
+		 Thread.sleep(1000*60*60);
+		 } catch (InterruptedException e) {
+		 e.printStackTrace();
+		 }
+		 }
+	}
+}

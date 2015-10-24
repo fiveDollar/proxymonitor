@@ -1,0 +1,51 @@
+package com.windoor.timing;
+
+import java.util.ArrayList;
+import java.util.Calendar;
+
+import com.util.mail.Mailto;
+import com.windoor.database.Database;
+
+public class Tst {
+
+	public static void main(String[] args) {
+		Database db = new Database();
+		// TODO Auto-generated method stub
+		while(true){
+			int y, m, d, h, mi, s;
+			Calendar cal = Calendar.getInstance();
+			y = cal.get(Calendar.YEAR);
+			m = cal.get(Calendar.MONTH)+1;
+			d = cal.get(Calendar.DATE);
+			h = cal.get(Calendar.HOUR_OF_DAY);
+			mi = cal.get(Calendar.MINUTE);
+			s = cal.get(Calendar.SECOND);
+			String cdate =y + "-" + m + "-" + d + " " + (h) + ":" + mi + ":"
+					+ s;
+			String odate = y + "-" + m + "-" + d + " " + (h-1) + ":00:00";
+			String a = "select count(*),`key` from click_result2  where date>'"+odate+"' group by `key`;";
+			System.out.println(a);
+			ArrayList<Object[]> bs = db.selectall(a);
+			long sum = 0;
+			String content = "从"+odate+"开始：\r\n";
+			for(Object[] b :bs){
+					long count = (long) b[0];
+					String key = (String) b[1];
+					content+=key +","+count+"\r\n";
+					sum+=count;
+			}
+			content +="总量为："+sum;
+			Mailto mail = new Mailto();
+			mail.send("zhangxian887@qq.com", content,"从"+odate+"开始的量");
+			try {
+				Thread.currentThread().sleep(1000*60);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
+		
+	}
+
+}
